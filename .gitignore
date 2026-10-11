@@ -1,0 +1,10 @@
+build/
+build-win/
+dist/
+*.o
+*.res.o
+/nova
+/nova.exe
+.DS_Store
+.vscode/
+.idea/

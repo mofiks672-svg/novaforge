@@ -1,0 +1,14 @@
+{
+  "name": "pr-review",
+  "description": "Ревью изменений, авто-исправление критичных проблем и уведомление в Slack/Telegram",
+  "trigger": { "type": "manual" },
+  "steps": [
+    { "id": "diff", "type": "shell", "run": "git diff HEAD~1 --stat && git diff HEAD~1 | head -c 20000" },
+    { "id": "review", "type": "ai", "mode": "plan",
+      "prompt": "Проведи ревью этого diff и отметь проблемы [CRITICAL|WARN|INFO]:\n{{steps.diff}}", "save_to": "REVIEW.md" },
+    { "id": "fix", "type": "ai", "condition": "contains:CRITICAL",
+      "prompt": "Исправь все CRITICAL-проблемы из ревью, затем запусти тесты:\n{{steps.review}}" },
+    { "id": "notify", "type": "http", "method": "POST", "url": "{{env.NOVA_WEBHOOK_URL}}", "condition": "env:NOVA_WEBHOOK_URL",
+      "body": { "text": "NovaForge: ревью завершено ({{date}}). См. REVIEW.md" } }
+  ]
+}

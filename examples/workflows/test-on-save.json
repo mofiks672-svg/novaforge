@@ -1,0 +1,10 @@
+{
+  "name": "test-on-save",
+  "description": "При изменении файлов в src/ запускает тесты и чинит падения",
+  "trigger": { "type": "watch", "paths": ["src"], "debounce": 5 },
+  "steps": [
+    { "id": "test", "type": "shell", "run": "make test", "continue_on_error": true },
+    { "id": "fix", "type": "ai", "condition": "failure",
+      "prompt": "Тесты упали. Найди причину и исправь:\n{{steps.test}}" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "nightly-docs",
+  "description": "Каждые 24 часа обновляет документацию по изменениям в src/",
+  "trigger": { "type": "interval", "seconds": 86400, "run_on_start": false },
+  "steps": [
+    { "id": "changes", "type": "shell", "run": "git log --since='1 day ago' --name-only --oneline -- src | head -100" },
+    { "id": "docs", "type": "ai", "condition": "not_contains:fatal",
+      "prompt": "Обнови README.md и docs/ с учётом изменений за сутки. Меняй только документацию:\n{{steps.changes}}" }
+  ]
+}

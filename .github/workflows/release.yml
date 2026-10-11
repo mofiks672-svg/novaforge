@@ -1,0 +1,36 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { os: ubuntu-latest,  name: linux-x86_64 }
+          - { os: macos-latest,   name: macos-arm64 }
+          - { os: windows-latest, name: windows-x86_64 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release
+      - name: package
+        shell: bash
+        run: |
+          mkdir -p out/novaforge-${{ matrix.name }}
+          cp build/nova* build/Release/nova.exe out/novaforge-${{ matrix.name }}/ 2>/dev/null || true
+          cp -r README.md LICENSE CHANGELOG.md examples docs scripts/install.sh out/novaforge-${{ matrix.name }}/
+          cd out && tar czf novaforge-${{ matrix.name }}.tar.gz novaforge-${{ matrix.name }}
+      - name: windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+          ./scripts/build-windows.ps1 -SkipBuild
+          Copy-Item dist/NovaForge-Setup-* out/
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/*.tar.gz
+            out/*.exe
+            out/*.sha256

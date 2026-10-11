@@ -1,0 +1,17 @@
+{
+  "model": "corp-llm/coder-70b",
+  "small_model": "",
+  "theme": "forge",
+  "glyphs": "auto",
+  "max_steps": 40,
+  "permission": { "edit": "ask", "bash": "ask", "webfetch": "allow" },
+  "instructions": ["docs/CONTRIBUTING.md"],
+  "server": { "host": "127.0.0.1", "port": 4096, "api_key": "change-me" },
+  "providers": {
+    "corp-llm": {
+      "name": "Корпоративный LLM",
+      "baseURL": "https://llm.company.local/v1",
+      "env": "CORP_LLM_KEY"
+    }
+  }
+}
