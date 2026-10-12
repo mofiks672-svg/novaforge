@@ -233,7 +233,14 @@ inline std::string toUtf8FromLocal(const std::string& s) {
     if (s.empty() || validUtf8(s)) return s;
     for (size_t cut = 1; cut <= 3 && cut < s.size(); ++cut)     // UTF-8 cut off by the output limit
         if (validUtf8(s.substr(0, s.size() - cut))) return s.substr(0, s.size() - cut);
-    for (UINT cp : {GetOEMCP(), GetACP()}) {
+    // GetOEMCP()/GetACP() return 65001 in nova.exe itself (UTF-8 manifest); child programs still
+    // use the system code pages, so they are read from the system locale.
+    auto sysCp = [](LCTYPE t, UINT def) {
+        DWORD v = 0;
+        if (GetLocaleInfoW(LOCALE_SYSTEM_DEFAULT, t | LOCALE_RETURN_NUMBER, (LPWSTR)&v, sizeof(v) / sizeof(WCHAR)) && v > 1) return (UINT)v;
+        return def;
+    };
+    for (UINT cp : {sysCp(LOCALE_IDEFAULTCODEPAGE, 866), sysCp(LOCALE_IDEFAULTANSICODEPAGE, 1251)}) {
         int n = MultiByteToWideChar(cp, MB_ERR_INVALID_CHARS, s.data(), (int)s.size(), nullptr, 0);
         if (n <= 0) continue;
         std::wstring w((size_t)n, L'\0'); MultiByteToWideChar(cp, 0, s.data(), (int)s.size(), &w[0], n);

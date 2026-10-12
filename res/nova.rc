@@ -6,6 +6,12 @@
 
 1 ICON "novaforge.ico"
 
+// MinGW/llvm-mingw: the manifest goes in as a resource. MSVC merges res/nova.manifest at link time
+// (listed in CMakeLists.txt), so it is not embedded twice.
+#ifdef NOVA_EMBED_MANIFEST
+1 24 "nova.manifest"
+#endif
+
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION    NOVA_VER
  PRODUCTVERSION NOVA_VER

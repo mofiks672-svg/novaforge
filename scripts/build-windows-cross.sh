@@ -38,7 +38,7 @@ fi
 mkdir -p build-win
 if [ -z "${SKIP_EXE:-}" ]; then
   echo "▸ nova.exe $VER"
-  x86_64-w64-mingw32-windres res/nova.rc -O coff -o build-win/nova.res.o
+  x86_64-w64-mingw32-windres -DNOVA_EMBED_MANIFEST res/nova.rc -O coff -o build-win/nova.res.o
   x86_64-w64-mingw32-clang++ -std=c++17 -O2 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -Wno-unknown-pragmas \
     src/main.cpp build-win/nova.res.o -o build-win/nova.exe -static -s -lws2_32 -lshell32 -lole32 -luuid -ladvapi32
 fi

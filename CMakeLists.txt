@@ -13,6 +13,11 @@ target_link_libraries(nova PRIVATE Threads::Threads)
 if(WIN32)
   enable_language(RC)
   target_sources(nova PRIVATE res/nova.rc)                     # icon + version info
+  if(MSVC)
+    target_sources(nova PRIVATE res/nova.manifest)             # UTF-8 code page, long paths
+  else()
+    set_source_files_properties(res/nova.rc PROPERTIES COMPILE_DEFINITIONS NOVA_EMBED_MANIFEST)
+  endif()
   target_link_libraries(nova PRIVATE ws2_32 shell32 ole32 uuid advapi32)
   target_compile_definitions(nova PRIVATE _CRT_SECURE_NO_WARNINGS NOMINMAX)
 endif()
