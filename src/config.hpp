@@ -6,7 +6,7 @@
 
 namespace nova {
 
-inline const char* VERSION = "1.5.0";
+inline const char* VERSION = "1.5.1";
 
 // Host part of an http(s) URL, lower-case, without port and brackets.
 inline std::string urlHost(const std::string& url) {

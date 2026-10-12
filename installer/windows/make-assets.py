@@ -96,7 +96,7 @@ for w, h in [(596, 432), (796, 576), (994, 720), (1272, 922)]:
 
 # ---------- big image (welcome page; finish page gets its own variant at runtime) ----------
 import math
-VERSION = "1.5.0"
+VERSION = "1.5.1"
 
 def vgrad(W, H, top, bottom):
     im = Image.new("RGB", (W, H)); d = ImageDraw.Draw(im)
@@ -254,7 +254,7 @@ def preview(name, W=300, H=220):
     px = 3; tw = word_w("NOVA FORGE", px); draw_word(d, "NOVA FORGE", (W - tw) // 2, 36, px, stops)
     y = 36 + 5 * px + 8
     d.text(((W - tw) // 2, y), "AI-кузница кода", font=fs, fill=muted)
-    d.text(((W + tw) // 2 - 36, y), "v1.5.0", font=fs, fill=accent)
+    d.text(((W + tw) // 2 - 36, y), "v1.5.1", font=fs, fill=accent)
     y += 24
     d.text((14, y), "●", font=fm, fill=ok if not plain else text); d.text((28, y), "Read(src/main.cpp)", font=fm, fill=text)
     y += 16; d.text((28, y), "└ 1503 строки", font=fm, fill=muted)

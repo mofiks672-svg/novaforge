@@ -213,6 +213,40 @@ inline std::string shellQuote(const std::string& s) {
 #endif
 }
 
+inline bool validUtf8(const std::string& s) {
+    size_t i = 0, n = s.size();
+    while (i < n) {
+        unsigned char c = (unsigned char)s[i];
+        size_t len = c < 0x80 ? 1 : (c >> 5) == 6 ? 2 : (c >> 4) == 14 ? 3 : (c >> 3) == 30 ? 4 : 0;
+        if (!len) return false;
+        if (i + len > n) return false;
+        for (size_t k = 1; k < len; ++k) if (((unsigned char)s[i + k] >> 6) != 2) return false;
+        i += len;
+    }
+    return true;
+}
+#ifdef _WIN32
+// Console programs (ping, ipconfig, net, git hooks, old compilers…) print in the OEM code page
+// (cp866 in Russian Windows) when their output goes to a pipe — that is mojibake in a UTF-8
+// terminal and for the model. Text that is not valid UTF-8 is converted from OEM, then ANSI.
+inline std::string toUtf8FromLocal(const std::string& s) {
+    if (s.empty() || validUtf8(s)) return s;
+    for (size_t cut = 1; cut <= 3 && cut < s.size(); ++cut)     // UTF-8 cut off by the output limit
+        if (validUtf8(s.substr(0, s.size() - cut))) return s.substr(0, s.size() - cut);
+    for (UINT cp : {GetOEMCP(), GetACP()}) {
+        int n = MultiByteToWideChar(cp, MB_ERR_INVALID_CHARS, s.data(), (int)s.size(), nullptr, 0);
+        if (n <= 0) continue;
+        std::wstring w((size_t)n, L'\0'); MultiByteToWideChar(cp, 0, s.data(), (int)s.size(), &w[0], n);
+        int m = WideCharToMultiByte(CP_UTF8, 0, w.data(), n, nullptr, 0, nullptr, nullptr);
+        std::string u((size_t)m, '\0'); WideCharToMultiByte(CP_UTF8, 0, w.data(), n, &u[0], m, nullptr, nullptr);
+        return u;
+    }
+    return s;
+}
+#else
+inline std::string toUtf8FromLocal(const std::string& s) { return s; }
+#endif
+
 struct CmdResult { int code = -1; std::string output; bool timedOut = false, cancelled = false; };
 
 // Set by Ctrl+C / Esc while a model turn runs; running commands are stopped.
@@ -229,7 +263,7 @@ inline CmdResult runCommand(const std::string& cmd, size_t maxBytes = 200000,
         if (r.output.size() < maxBytes) r.output.append(buf, std::min(n, maxBytes - r.output.size()));
         if (r.output.size() >= maxBytes && n) truncated = true;
         if (!onLine) return;
-        for (size_t i = 0; i < n; ++i) { line += buf[i]; if (buf[i] == '\n') { onLine(line); line.clear(); } }
+        for (size_t i = 0; i < n; ++i) { line += buf[i]; if (buf[i] == '\n') { onLine(toUtf8FromLocal(line)); line.clear(); } }
     };
 #ifdef _WIN32
     // CreateProcessW + pipe instead of _popen: UTF-8 command lines (Cyrillic paths), no cmd AutoRun
@@ -280,7 +314,8 @@ inline CmdResult runCommand(const std::string& cmd, size_t maxBytes = 200000,
         }
         if (WaitForSingleObject(pi.hProcess, 15) == WAIT_OBJECT_0) exited = true;  // read what is left, then stop
     }
-    if (onLine && !line.empty()) onLine(line);
+    if (onLine && !line.empty()) onLine(toUtf8FromLocal(line));
+    r.output = toUtf8FromLocal(r.output);
     while (WaitForSingleObject(pi.hProcess, 50) == WAIT_TIMEOUT) {   // output closed, process still running
         bool timeUp = timeoutMs > 0 && (long long)GetTickCount64() - t0 > timeoutMs;
         if (killed) { if ((long long)GetTickCount64() - killedAt > 2000) break; continue; }

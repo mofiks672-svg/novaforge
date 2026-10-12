@@ -57,6 +57,11 @@ public:
         o << "# Окружение\n"
           << "Рабочая директория: " << fs::current_path().string() << "\n"
           << "ОС: " << osName() << "\n"
+#ifdef _WIN32
+          << "Shell для bash: cmd.exe (Windows). Пиши команды для cmd: dir, type, copy, del, findstr, where, set; "
+             "переменные %VAR%, цепочки через &&. Нужен PowerShell — вызывай явно: powershell -NoProfile -Command \"...\". "
+             "Пути с пробелами бери в двойные кавычки. Unix-утилит (ls, grep, cat, rm) может не быть.\n"
+#endif
           << "Дата: " << isoTime().substr(0, 10) << "\n"
           << "Git-репозиторий: " << (fs::exists(fs::current_path() / ".git") ? "да" : "нет") << "\n";
         o << projectInstructions();

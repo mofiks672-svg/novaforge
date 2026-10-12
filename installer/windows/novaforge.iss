@@ -1,6 +1,6 @@
 ﻿; NovaForge — Windows x64 installer (Inno Setup 6.7+).
 ; Build:  scripts\build-windows.ps1
-;   or:   ISCC.exe /DAppVersion=1.5.0 /DNovaExe=..\..\build\Release\nova.exe installer\windows\novaforge.iss
+;   or:   ISCC.exe /DAppVersion=1.5.1 /DNovaExe=..\..\build\Release\nova.exe installer\windows\novaforge.iss
 ; Artwork: installer\windows\make-assets.py regenerates everything in assets\.
 ;
 ; Wizard: Welcome → License → Folder → Components → Projects folder → (upgrade: keep settings?)
@@ -17,7 +17,7 @@
 ; nova.exe applies them on its next start (config.json + auth.json) and deletes the file.
 
 #ifndef AppVersion
-  #define AppVersion "1.5.0"
+  #define AppVersion "1.5.1"
 #endif
 #ifndef NovaExe
   #define NovaExe "..\..\build\Release\nova.exe"

@@ -2,6 +2,8 @@ name: release
 on:
   push:
     tags: ["v*"]
+permissions:
+  contents: write
 jobs:
   build:
     strategy:
@@ -21,8 +23,11 @@ jobs:
           cp build/nova* build/Release/nova.exe out/novaforge-${{ matrix.name }}/ 2>/dev/null || true
           cp -r README.md LICENSE CHANGELOG.md examples docs scripts/install.sh out/novaforge-${{ matrix.name }}/
           cd out && tar czf novaforge-${{ matrix.name }}.tar.gz novaforge-${{ matrix.name }}
+      # The installer attached to releases is built with scripts/build-windows-cross.sh (Inno Setup 6.7.3).
+      # Set the repository variable BUILD_INSTALLER=true to build it here as well.
       - name: windows installer
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && vars.BUILD_INSTALLER == 'true'
+        continue-on-error: true
         shell: pwsh
         run: |
           if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }

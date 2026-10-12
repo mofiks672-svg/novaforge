@@ -137,5 +137,5 @@ scripts/build-windows-cross.sh        # llvm-mingw → nova.exe, Inno Setup по
 
 ```powershell
 signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a build\Release\nova.exe
-signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a dist\NovaForge-Setup-1.5.0-x64.exe
+signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a dist\NovaForge-Setup-1.5.1-x64.exe
 ```

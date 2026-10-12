@@ -1,8 +1,8 @@
 // NovaForge — Windows resources: icon and version info shown in Explorer / Task Manager.
 #include <winver.h>
 
-#define NOVA_VER        1,5,0,0
-#define NOVA_VER_STR    "1.5.0"
+#define NOVA_VER        1,5,1,0
+#define NOVA_VER_STR    "1.5.1"
 
 1 ICON "novaforge.ico"
 

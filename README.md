@@ -66,7 +66,7 @@ NovaForge — консольный AI-агент в духе Claude Code и open
 
 Требования: Windows 10/11 x64. `curl`, нужный для сетевых запросов, уже входит в Windows 10+. VC++ Redistributable не нужен — рантайм собран статически.
 
-Тихая установка: `NovaForge-Setup-1.5.0-x64.exe /VERYSILENT /CURRENTUSER` (или `/ALLUSERS`). Подробности — в [docs/WINDOWS.md](docs/WINDOWS.md).
+Тихая установка: `NovaForge-Setup-1.5.1-x64.exe /VERYSILENT /CURRENTUSER` (или `/ALLUSERS`). Подробности — в [docs/WINDOWS.md](docs/WINDOWS.md).
 
 ### Linux и macOS
 
@@ -412,7 +412,7 @@ SKIP_EXE=1 scripts/build-windows-cross.sh   # только установщик
 **Релиз.** Тег `v*` запускает [GitHub Actions](.github/workflows/release.yml): сборки для Linux x86_64, macOS arm64 и Windows x64 плюс установщик публикуются в Releases.
 
 ```bash
-git tag v1.5.0 && git push origin v1.5.0
+git tag v1.5.1 && git push origin v1.5.1
 ```
 
 ## Архитектура

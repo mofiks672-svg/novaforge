@@ -130,6 +130,27 @@ inline void writeFrame(const std::string& s) {
 // One terminal line rewritten in place: "\r" + text + reset + erase-to-end-of-line.
 inline std::string inPlace(const std::string& text) { return "\r" + text + "\x1b[0m\x1b[K"; }
 
+#ifdef _WIN32
+// A classic console window (conhost: PowerShell, cmd, shortcuts) may use the raster font
+// ("Raster Fonts" / "Точечные шрифты"). It cannot show UTF-8: Cyrillic and box characters become
+// garbage. Switch such a window to a TrueType font of the same height for the session and put the
+// original font back on exit. Windows Terminal and other terminals are not affected.
+inline void fixRasterFont(HANDLE h) {
+    static CONSOLE_FONT_INFOEX orig{};
+    CONSOLE_FONT_INFOEX f{}; f.cbSize = sizeof f;
+    if (!GetCurrentConsoleFontEx(h, FALSE, &f)) return;
+    if (f.FontFamily & TMPF_TRUETYPE) return;                  // already TrueType
+    orig = f;
+    CONSOLE_FONT_INFOEX n{}; n.cbSize = sizeof n;
+    n.dwFontSize.X = 0;
+    n.dwFontSize.Y = f.dwFontSize.Y >= 12 ? f.dwFontSize.Y + 4 : 16;   // raster 8x12 ≈ TrueType 16
+    n.FontFamily = FF_DONTCARE | TMPF_TRUETYPE; n.FontWeight = FW_NORMAL;
+    wcscpy(n.FaceName, L"Consolas");
+    if (!SetCurrentConsoleFontEx(h, FALSE, &n)) { wcscpy(n.FaceName, L"Lucida Console"); SetCurrentConsoleFontEx(h, FALSE, &n); }
+    std::atexit([] { HANDLE o = GetStdHandle(STD_OUTPUT_HANDLE); if (o != INVALID_HANDLE_VALUE) SetCurrentConsoleFontEx(o, FALSE, &orig); });
+}
+#endif
+
 class UI {
     std::vector<std::string> recent_;
 public:
@@ -147,6 +168,7 @@ public:
         SetConsoleCP(CP_UTF8);
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE); DWORD mode = 0;
         if (GetConsoleMode(h, &mode)) SetConsoleMode(h, mode | 0x0004 /*ENABLE_VIRTUAL_TERMINAL_PROCESSING*/);
+        fixRasterFont(h);
         depth = Depth::True;
 #else
         std::string ct = lower(env("COLORTERM")), term = lower(env("TERM")), prog = env("TERM_PROGRAM");

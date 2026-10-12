@@ -263,6 +263,14 @@ inline int menu(const std::string& title, const std::vector<MenuItem>& items, in
         else if (k.key == Key::None) continue;
         draw(false);
     }
+    // Collapse the finished menu into one line ("Разрешить? › Да"), so answered questions do not
+    // leave a full list of options in the scrollback.
+    if (lines && !title.empty()) {
+        std::string out = syncOn() + "\x1b[" + std::to_string(lines) + "A";
+        std::string answer = result >= 0 ? ui.accent(gl::pointer) + " " + items[(size_t)result].label : ui.muted("отменено");
+        out += inPlace("  " + ui.muted(title) + "  " + answer) + "\r\n\x1b[J" + syncOff();
+        writeFrame(out);
+    }
     Term::raw(false); Term::hideCursor(false);
     return result;
 }
