@@ -154,9 +154,9 @@ public:
                 for (auto& tc : m.get("tool_calls").arr()) o << "  -> " << tc.get("function").getString("name") << " " << truncateUtf8(tc.get("function").getString("arguments"), 300) << "\n";
             }
         }
-        std::string small = Config::get().data.getString("small_model"); if (small.empty()) small = modelFor(s);
-        if (small.empty()) { err = "Модель не выбрана — /connect"; return false; }
-        auto r = LLM::complete(small, "Ты сжимаешь историю диалога разработчика с AI-ассистентом. Сохрани: цель, принятые решения, изменённые файлы, текущий статус и следующие шаги. Пиши компактно, Markdown.", truncateUtf8(o.str(), 60000));
+        std::string smallModel = Config::get().data.getString("small_model"); if (smallModel.empty()) smallModel = modelFor(s);
+        if (smallModel.empty()) { err = "Модель не выбрана — /connect"; return false; }
+        auto r = LLM::complete(smallModel, "Ты сжимаешь историю диалога разработчика с AI-ассистентом. Сохрани: цель, принятые решения, изменённые файлы, текущий статус и следующие шаги. Пиши компактно, Markdown.", truncateUtf8(o.str(), 60000));
         if (!r.ok()) { err = r.error; return false; }
         s.messages = Json::array();
         s.messages.push(Json::object().set("role", "user").set("content", "Краткое содержание предыдущей части сессии:\n\n" + r.content));
